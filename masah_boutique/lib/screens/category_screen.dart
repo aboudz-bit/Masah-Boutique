@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../l10n/app_localizations.dart';
 import '../providers/language_provider.dart';
 import '../models/product.dart';
 import '../widgets/product_card.dart';
@@ -277,9 +277,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                           itemCount: _filteredProducts.length,
                           itemBuilder: (context, index) {
                             final product = _filteredProducts[index];
-                            return ProductCard(
-                              product: product,
-                              locale: lang,
+                            return GestureDetector(
                               onTap: () {
                                 Navigator.push(
                                   context,
@@ -288,6 +286,9 @@ class _CategoryScreenState extends State<CategoryScreen> {
                                   ),
                                 );
                               },
+                              child: ProductCard(
+                                product: product,
+                              ),
                             );
                           },
                         ),

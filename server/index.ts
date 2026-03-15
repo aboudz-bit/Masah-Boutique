@@ -91,13 +91,15 @@ app.use((req, res, next) => {
     return res.status(status).json({ message });
   });
 
+  const publicPath = path.resolve(import.meta.dirname, "..", "public");
   const flutterBuildPath = path.resolve(import.meta.dirname, "..", "masah_boutique", "build", "web");
-  if (fs.existsSync(flutterBuildPath)) {
-    app.use(express.static(flutterBuildPath));
+  const staticPath = fs.existsSync(publicPath) ? publicPath : flutterBuildPath;
+  if (fs.existsSync(staticPath)) {
+    app.use(express.static(staticPath));
     app.use((_req, res) => {
-      res.sendFile(path.resolve(flutterBuildPath, "index.html"));
+      res.sendFile(path.resolve(staticPath, "index.html"));
     });
-    log("Serving Flutter web build");
+    log(`Serving Flutter web build from ${staticPath}`);
   } else {
     app.get("/", (_req, res) => {
       res.json({

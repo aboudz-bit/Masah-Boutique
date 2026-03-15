@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'l10n/app_localizations.dart';
 import 'providers/language_provider.dart';
 import 'providers/cart_provider.dart';
 import 'providers/favorites_provider.dart';
@@ -116,7 +116,7 @@ class MasahBoutiqueApp extends StatelessWidget {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
-        cardTheme: CardTheme(
+        cardTheme: CardThemeData(
           elevation: 1,
           shadowColor: Colors.black.withOpacity(0.06),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
