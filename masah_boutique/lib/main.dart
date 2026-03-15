@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'services/api_service.dart';
 import 'services/cart_provider.dart';
 import 'services/locale_provider.dart';
+import 'providers/favorites_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/products_screen.dart';
 import 'screens/product_detail_screen.dart';
@@ -11,8 +12,19 @@ import 'screens/cart_screen.dart';
 import 'screens/checkout_screen.dart';
 import 'screens/orders_screen.dart';
 import 'screens/stores_screen.dart';
+import 'screens/settings_screen.dart';
+import 'screens/category_screen.dart';
+import 'screens/order_confirmation_screen.dart';
+import 'utils/arabic_digits.dart';
+
+const kGoldPrimary = Color(0xFFC8A96E);
+const kGoldDark = Color(0xFFB8944E);
+const kBgDark = Color(0xFF1A1A2E);
+const kBgDarker = Color(0xFF16162A);
+const kBgCard = Color(0xFF222240);
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MasahBoutiqueApp());
 }
 
@@ -25,6 +37,7 @@ class MasahBoutiqueApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => LocaleProvider()),
+        ChangeNotifierProvider(create: (_) => FavoritesProvider()),
       ],
       child: Consumer<LocaleProvider>(
         builder: (context, localeProvider, _) {
@@ -43,29 +56,81 @@ class MasahBoutiqueApp extends StatelessWidget {
             ],
             theme: ThemeData(
               colorScheme: ColorScheme.dark(
-                primary: const Color(0xFFC8A96E),
+                primary: kGoldPrimary,
                 secondary: const Color(0xFFE8D5A8),
-                surface: const Color(0xFF1A1A2E),
-                onPrimary: const Color(0xFF1A1A2E),
-                onSecondary: const Color(0xFF1A1A2E),
+                surface: kBgDark,
+                onPrimary: kBgDark,
+                onSecondary: kBgDark,
                 onSurface: Colors.white,
               ),
-              scaffoldBackgroundColor: const Color(0xFF1A1A2E),
+              scaffoldBackgroundColor: kBgDark,
               appBarTheme: const AppBarTheme(
-                backgroundColor: Color(0xFF16162A),
-                foregroundColor: Color(0xFFC8A96E),
+                backgroundColor: kBgDarker,
+                foregroundColor: kGoldPrimary,
+                elevation: 0,
+                centerTitle: true,
+              ),
+              elevatedButtonTheme: ElevatedButtonThemeData(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: kGoldPrimary,
+                  foregroundColor: kBgDark,
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                  elevation: 0,
+                ),
+              ),
+              cardTheme: CardTheme(
+                elevation: 0,
+                color: kBgCard,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+              ),
+              bottomNavigationBarTheme: BottomNavigationBarThemeData(
+                backgroundColor: kBgDarker,
+                selectedItemColor: kGoldPrimary,
+                unselectedItemColor: Colors.grey[600],
+                type: BottomNavigationBarType.fixed,
                 elevation: 0,
               ),
-              fontFamily: 'Tajawal',
               useMaterial3: true,
             ),
             home: const MainScreen(),
-            routes: {
-              '/products': (context) => const ProductsScreen(),
-              '/cart': (context) => const CartScreen(),
-              '/checkout': (context) => const CheckoutScreen(),
-              '/orders': (context) => const OrdersScreen(),
-              '/stores': (context) => const StoresScreen(),
+            onGenerateRoute: (settings) {
+              Widget? page;
+              if (settings.name?.startsWith('/product/') ?? false) {
+                final idStr = settings.name!.replaceFirst('/product/', '');
+                final id = int.tryParse(idStr);
+                if (id != null) page = ProductDetailScreen(productId: id);
+              } else if (settings.name?.startsWith('/category/') ?? false) {
+                final slug = settings.name!.replaceFirst('/category/', '');
+                if (slug.isNotEmpty) page = CategoryScreen(slug: slug);
+              } else if (settings.name == '/checkout') {
+                page = const CheckoutScreen();
+              } else if (settings.name == '/orders') {
+                page = const OrdersScreen();
+              } else if (settings.name == '/stores') {
+                page = const StoresScreen();
+              } else if (settings.name == '/order-confirmation') {
+                page = OrderConfirmationScreen(order: settings.arguments);
+              }
+              if (page != null) {
+                return PageRouteBuilder(
+                  pageBuilder: (context, animation, secondaryAnimation) => page!,
+                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: Tween<Offset>(begin: const Offset(0, 0.03), end: Offset.zero).animate(
+                          CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                        ),
+                        child: child,
+                      ),
+                    );
+                  },
+                  transitionDuration: const Duration(milliseconds: 280),
+                );
+              }
+              return null;
             },
           );
         },
@@ -84,28 +149,42 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = [
-    const HomeScreen(),
-    const ProductsScreen(),
-    const CartScreen(),
-    const OrdersScreen(),
-    const StoresScreen(),
+  final List<Widget> _screens = const [
+    HomeScreen(),
+    ProductsScreen(),
+    CartScreen(),
+    SettingsScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<CartProvider>(context, listen: false).loadCart();
+      Provider.of<FavoritesProvider>(context, listen: false).load();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final isAr = Localizations.localeOf(context).languageCode == 'ar';
+    final lang = Localizations.localeOf(context).languageCode;
+    final cart = context.watch<CartProvider>();
+    final cartBadge = ArabicDigits.convert(cart.itemCount, lang);
 
     return Directionality(
       textDirection: isAr ? TextDirection.rtl : TextDirection.ltr,
       child: Scaffold(
-        body: _screens[_currentIndex],
+        body: IndexedStack(
+          index: _currentIndex,
+          children: _screens,
+        ),
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
-            color: const Color(0xFF16162A),
+            color: kBgDarker,
             border: Border(
               top: BorderSide(
-                color: const Color(0xFFC8A96E).withOpacity(0.2),
+                color: kGoldPrimary.withOpacity(0.2),
                 width: 1,
               ),
             ),
@@ -113,12 +192,6 @@ class _MainScreenState extends State<MainScreen> {
           child: BottomNavigationBar(
             currentIndex: _currentIndex,
             onTap: (index) => setState(() => _currentIndex = index),
-            type: BottomNavigationBarType.fixed,
-            backgroundColor: const Color(0xFF16162A),
-            selectedItemColor: const Color(0xFFC8A96E),
-            unselectedItemColor: Colors.grey[600],
-            selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
-            unselectedLabelStyle: const TextStyle(fontSize: 11),
             items: [
               BottomNavigationBarItem(
                 icon: const Icon(Icons.home_outlined),
@@ -126,46 +199,29 @@ class _MainScreenState extends State<MainScreen> {
                 label: isAr ? 'الرئيسية' : 'Home',
               ),
               BottomNavigationBarItem(
-                icon: const Icon(Icons.grid_view_outlined),
-                activeIcon: const Icon(Icons.grid_view),
-                label: isAr ? 'المنتجات' : 'Products',
+                icon: const Icon(Icons.shopping_bag_outlined),
+                activeIcon: const Icon(Icons.shopping_bag),
+                label: isAr ? 'المتجر' : 'Shop',
               ),
               BottomNavigationBarItem(
-                icon: Consumer<CartProvider>(
-                  builder: (context, cart, child) {
-                    return Badge(
-                      isLabelVisible: cart.itemCount > 0,
-                      label: Text('${cart.itemCount}'),
-                      backgroundColor: const Color(0xFFC8A96E),
-                      textColor: const Color(0xFF1A1A2E),
-                      child: child!,
-                    );
-                  },
-                  child: const Icon(Icons.shopping_bag_outlined),
+                icon: Badge(
+                  isLabelVisible: cart.itemCount > 0,
+                  label: Text(cartBadge, style: const TextStyle(fontSize: 10)),
+                  backgroundColor: kGoldPrimary,
+                  child: const Icon(Icons.shopping_cart_outlined),
                 ),
-                activeIcon: Consumer<CartProvider>(
-                  builder: (context, cart, child) {
-                    return Badge(
-                      isLabelVisible: cart.itemCount > 0,
-                      label: Text('${cart.itemCount}'),
-                      backgroundColor: const Color(0xFFC8A96E),
-                      textColor: const Color(0xFF1A1A2E),
-                      child: child!,
-                    );
-                  },
-                  child: const Icon(Icons.shopping_bag),
+                activeIcon: Badge(
+                  isLabelVisible: cart.itemCount > 0,
+                  label: Text(cartBadge, style: const TextStyle(fontSize: 10)),
+                  backgroundColor: kGoldPrimary,
+                  child: const Icon(Icons.shopping_cart),
                 ),
                 label: isAr ? 'السلة' : 'Cart',
               ),
               BottomNavigationBarItem(
-                icon: const Icon(Icons.receipt_long_outlined),
-                activeIcon: const Icon(Icons.receipt_long),
-                label: isAr ? 'الطلبات' : 'Orders',
-              ),
-              BottomNavigationBarItem(
-                icon: const Icon(Icons.store_outlined),
-                activeIcon: const Icon(Icons.store),
-                label: isAr ? 'الفروع' : 'Stores',
+                icon: const Icon(Icons.settings_outlined),
+                activeIcon: const Icon(Icons.settings),
+                label: isAr ? 'الإعدادات' : 'Settings',
               ),
             ],
           ),
