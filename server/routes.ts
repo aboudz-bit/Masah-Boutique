@@ -281,6 +281,27 @@ export async function registerRoutes(
     }
   });
 
+  // Notification routes
+  app.get("/api/notifications", async (req, res) => {
+    try {
+      const sessionId = req.session?.id || "anonymous";
+      const notificationsList = await storage.getNotifications(sessionId);
+      res.json(notificationsList);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  app.patch("/api/notifications/:id/read", async (req, res) => {
+    try {
+      const notification = await storage.markNotificationRead(parseInt(req.params.id));
+      if (!notification) return res.status(404).json({ message: "Notification not found" });
+      res.json(notification);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
   // Payment routes
   app.post("/api/payments/session", async (req, res) => {
     try {
