@@ -1,50 +1,70 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
-import '../services/locale_provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../providers/language_provider.dart';
+import '../main.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final locale = context.watch<LocaleProvider>();
-    final isAr = locale.isArabic;
+    final l10n = AppLocalizations.of(context)!;
+    final langProvider = Provider.of<LanguageProvider>(context);
+    final isAr = langProvider.isArabic;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isAr ? 'الإعدادات' : 'Settings'),
+        title: Text(l10n.settings),
       ),
       body: ListView(
         padding: const EdgeInsets.all(20),
         children: [
-          // Brand header
+          // --- Brand Logo Placeholder ---
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(28),
             decoration: BoxDecoration(
-              color: const Color(0xFF222240),
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFC8A96E).withOpacity(0.2)),
+              color: kCardBg,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: kDivider),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.04),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(16),
+                  width: 80,
+                  height: 80,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: const Color(0xFFC8A96E).withOpacity(0.3), width: 2),
+                    color: kGoldPrimary.withOpacity(0.08),
+                    border: Border.all(color: kGoldPrimary.withOpacity(0.3), width: 2),
                   ),
-                  child: const Icon(Icons.diamond_outlined, color: Color(0xFFC8A96E), size: 40),
+                  child: const Icon(Icons.diamond_outlined, color: kGoldPrimary, size: 40),
                 ),
-                const SizedBox(height: 12),
-                const Text(
-                  'بوتيك ماسـة',
-                  style: TextStyle(color: Color(0xFFC8A96E), fontSize: 24, fontWeight: FontWeight.w800),
+                const SizedBox(height: 14),
+                Text(
+                  l10n.appName,
+                  style: playfairDisplay(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: kGoldPrimary,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  isAr ? 'أناقتك تبدأ من هنا' : 'Your Elegance Starts Here',
-                  style: TextStyle(color: Colors.grey[500], fontSize: 14),
+                  l10n.heroTitle,
+                  style: TextStyle(color: kSecondaryText, fontSize: 14),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '@masahboutique',
+                  style: TextStyle(color: kSecondaryText.withOpacity(0.7), fontSize: 12),
                 ),
               ],
             ),
@@ -52,87 +72,171 @@ class SettingsScreen extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // Language toggle
-          _buildSettingCard(
-            icon: Icons.language,
-            title: isAr ? 'اللغة' : 'Language',
-            subtitle: isAr ? 'العربية' : 'English',
-            trailing: Switch(
-              value: isAr,
-              onChanged: (_) => locale.toggleLocale(),
-              activeColor: const Color(0xFFC8A96E),
+          // --- Language Toggle (Pill-style) ---
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: kCardBg,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: kDivider),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: kGoldPrimary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.language, color: kGoldPrimary, size: 22),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    l10n.language,
+                    style: TextStyle(
+                      color: kCharcoal,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                    ),
+                  ),
+                ),
+                // Pill-style switcher
+                Container(
+                  decoration: BoxDecoration(
+                    color: kCreamBg,
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: kDivider),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _languagePill(
+                        label: 'العربية',
+                        isSelected: isAr,
+                        onTap: () {
+                          if (!isAr) langProvider.toggleLanguage();
+                        },
+                      ),
+                      _languagePill(
+                        label: 'EN',
+                        isSelected: !isAr,
+                        onTap: () {
+                          if (isAr) langProvider.toggleLanguage();
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
 
           const SizedBox(height: 12),
 
-          // Orders
+          // --- Notifications ---
           _buildSettingCard(
-            icon: Icons.receipt_long,
-            title: isAr ? 'طلباتي' : 'My Orders',
+            context: context,
+            icon: Icons.notifications_outlined,
+            title: l10n.notifications,
+            subtitle: isAr ? 'عرض إشعاراتك' : 'View your notifications',
+            onTap: () => Navigator.pushNamed(context, '/notifications'),
+          ),
+
+          const SizedBox(height: 12),
+
+          // --- Orders ---
+          _buildSettingCard(
+            context: context,
+            icon: Icons.receipt_long_outlined,
+            title: l10n.myOrders,
             subtitle: isAr ? 'عرض سجل الطلبات' : 'View order history',
             onTap: () => Navigator.pushNamed(context, '/orders'),
           ),
 
-          const SizedBox(height: 12),
-
-          // Instagram
-          _buildSettingCard(
-            icon: Icons.camera_alt,
-            title: isAr ? 'انستقرام' : 'Instagram',
-            subtitle: '@masahboutique',
-            onTap: () async {
-              final uri = Uri.parse('https://www.instagram.com/masahboutique');
-              if (await canLaunchUrl(uri)) {
-                await launchUrl(uri, mode: LaunchMode.externalApplication);
-              }
-            },
-          ),
-
-          const SizedBox(height: 12),
-
-          // Store locator
-          _buildSettingCard(
-            icon: Icons.store,
-            title: isAr ? 'فروعنا' : 'Our Stores',
-            subtitle: isAr ? 'سيهات، القطيف، الدمام' : 'Saihat, Qatif, Dammam',
-            onTap: () => Navigator.pushNamed(context, '/stores'),
-          ),
-
           const SizedBox(height: 24),
 
-          // Info section
+          // --- Info Section ---
           Text(
             isAr ? 'معلومات' : 'Information',
-            style: const TextStyle(color: Color(0xFFC8A96E), fontSize: 18, fontWeight: FontWeight.w600),
+            style: playfairDisplay(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: kCharcoal,
+            ),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
 
-          _buildInfoTile(Icons.local_shipping_outlined, isAr ? 'شحن مجاني للطلبات فوق ١٥٠ ر.س' : 'Free shipping on orders over SAR 150'),
-          _buildInfoTile(Icons.replay, isAr ? 'سياسة إرجاع ٣٠ يوم' : '30-day return policy'),
-          _buildInfoTile(Icons.lock_outline, isAr ? 'دفع آمن' : 'Secure payment'),
-          _buildInfoTile(Icons.handshake_outlined, isAr ? 'منتجات أصلية ١٠٠٪' : '100% authentic products'),
+          _buildInfoTile(
+            Icons.local_shipping_outlined,
+            l10n.shippingInfo,
+            isAr ? 'شحن مجاني للطلبات فوق ١٥٠ ر.س' : 'Free shipping on orders over SAR 150',
+          ),
+          _buildInfoTile(
+            Icons.replay,
+            l10n.returnPolicy,
+            isAr ? 'استبدال وإرجاع خلال ٣٠ يوم' : 'Exchange and return within 30 days',
+          ),
+          _buildInfoTile(
+            Icons.lock_outline,
+            l10n.securePayment,
+            isAr ? 'جميع المدفوعات مشفرة وآمنة' : 'All payments are encrypted and secure',
+          ),
+          _buildInfoTile(
+            Icons.handshake_outlined,
+            isAr ? 'منتجات أصلية' : 'Authentic Products',
+            isAr ? 'منتجات أصلية ١٠٠٪ مصنوعة يدوياً' : '100% authentic handcrafted products',
+          ),
 
           const SizedBox(height: 24),
 
-          // Discount banner
+          // --- Welcome Discount Banner ---
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [const Color(0xFFC8A96E).withOpacity(0.15), const Color(0xFFC8A96E).withOpacity(0.05)],
+                colors: [
+                  kGoldPrimary.withOpacity(0.12),
+                  kGoldPrimary.withOpacity(0.04),
+                ],
+                begin: AlignmentDirectional.centerStart,
+                end: AlignmentDirectional.centerEnd,
               ),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFC8A96E).withOpacity(0.3)),
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(color: kGoldPrimary.withOpacity(0.2)),
             ),
             child: Row(
               children: [
-                const Icon(Icons.local_offer, color: Color(0xFFC8A96E)),
-                const SizedBox(width: 12),
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: kGoldPrimary.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.local_offer, color: kGoldPrimary, size: 22),
+                ),
+                const SizedBox(width: 14),
                 Expanded(
-                  child: Text(
-                    isAr ? 'استخدمي كود MASAH10 لخصم ١٠٪ على أول طلب' : 'Use code MASAH10 for 10% off your first order',
-                    style: TextStyle(color: Colors.grey[300], fontSize: 13),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'MASAH10',
+                        style: TextStyle(
+                          color: kGoldPrimary,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                          letterSpacing: 1,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        l10n.welcomeDiscount,
+                        style: TextStyle(color: kSecondaryText, fontSize: 13),
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -141,20 +245,57 @@ class SettingsScreen extends StatelessWidget {
 
           const SizedBox(height: 24),
 
-          // Version
+          // --- About ---
           Center(
             child: Text(
-              'v1.0.0',
-              style: TextStyle(color: Colors.grey[600], fontSize: 12),
+              l10n.aboutBrand,
+              style: TextStyle(color: kSecondaryText, fontSize: 12),
+              textAlign: TextAlign.center,
             ),
           ),
           const SizedBox(height: 8),
+
+          // --- Version ---
+          Center(
+            child: Text(
+              'v1.0.0',
+              style: TextStyle(color: kSecondaryText.withOpacity(0.5), fontSize: 12),
+            ),
+          ),
+          const SizedBox(height: 16),
         ],
       ),
     );
   }
 
+  Widget _languagePill({
+    required String label,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? kGoldPrimary : Colors.transparent,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected ? Colors.white : kSecondaryText,
+            fontWeight: FontWeight.w600,
+            fontSize: 13,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildSettingCard({
+    required BuildContext context,
     required IconData icon,
     required String title,
     required String subtitle,
@@ -166,9 +307,9 @@ class SettingsScreen extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: const Color(0xFF222240),
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: const Color(0xFFC8A96E).withOpacity(0.1)),
+          color: kCardBg,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: kDivider),
         ),
         child: Row(
           children: [
@@ -176,39 +317,76 @@ class SettingsScreen extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: const Color(0xFFC8A96E).withOpacity(0.1),
+                color: kGoldPrimary.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: const Color(0xFFC8A96E), size: 22),
+              child: Icon(icon, color: kGoldPrimary, size: 22),
             ),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 15)),
+                  Text(
+                    title,
+                    style: TextStyle(
+                      color: kCharcoal,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                    ),
+                  ),
                   const SizedBox(height: 2),
-                  Text(subtitle, style: TextStyle(color: Colors.grey[500], fontSize: 13)),
+                  Text(
+                    subtitle,
+                    style: TextStyle(color: kSecondaryText, fontSize: 13),
+                  ),
                 ],
               ),
             ),
             if (trailing != null) trailing,
             if (onTap != null && trailing == null)
-              Icon(Icons.chevron_right, color: Colors.grey[600]),
+              Icon(Icons.chevron_right, color: kSecondaryText),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInfoTile(IconData icon, String text) {
+  Widget _buildInfoTile(IconData icon, String title, String subtitle) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.only(bottom: 12),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: const Color(0xFFC8A96E), size: 20),
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: kGoldPrimary.withOpacity(0.08),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: kGoldPrimary, size: 18),
+          ),
           const SizedBox(width: 12),
-          Text(text, style: TextStyle(color: Colors.grey[400], fontSize: 14)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: TextStyle(
+                    color: kCharcoal,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+                Text(
+                  subtitle,
+                  style: TextStyle(color: kSecondaryText, fontSize: 12),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

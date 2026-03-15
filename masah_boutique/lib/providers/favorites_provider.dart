@@ -4,9 +4,12 @@ import '../models/product.dart';
 import '../services/api_service.dart';
 
 class FavoritesProvider extends ChangeNotifier {
+  final ApiService _api;
   Set<int> _favoriteIds = {};
   List<Product> _favoriteProducts = [];
   bool _loaded = false;
+
+  FavoritesProvider(this._api);
 
   Set<int> get favoriteIds => _favoriteIds;
   List<Product> get favoriteProducts => _favoriteProducts;
@@ -30,7 +33,7 @@ class FavoritesProvider extends ChangeNotifier {
     } else {
       _favoriteIds.add(productId);
       try {
-        final product = await ApiService.getProduct(productId);
+        final product = await _api.getProduct(productId);
         _favoriteProducts.add(product);
       } catch (_) {}
     }
@@ -47,7 +50,7 @@ class FavoritesProvider extends ChangeNotifier {
     final products = <Product>[];
     for (final id in _favoriteIds) {
       try {
-        final product = await ApiService.getProduct(id);
+        final product = await _api.getProduct(id);
         products.add(product);
       } catch (_) {}
     }

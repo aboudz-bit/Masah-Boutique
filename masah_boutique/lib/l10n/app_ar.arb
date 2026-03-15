@@ -47,12 +47,17 @@
   "invalidCode": "كود الخصم غير صالح",
   "placeOrder": "تأكيد الطلب",
   "orderConfirmed": "تم تأكيد الطلب!",
+  "orderConfirmedMessage": "شكراً لطلبك. سنخبرك عند الشحن.",
   "orderHistory": "سجل الطلبات",
   "noOrders": "لا توجد طلبات بعد",
+  "pending": "معلق",
+  "paid": "مدفوع",
   "processing": "قيد المعالجة",
   "confirmed": "تم التأكيد",
   "shipped": "تم الشحن",
   "delivered": "تم التوصيل",
+  "readyForPickup": "جاهز للاستلام",
+  "pickedUp": "تم الاستلام",
   "cancelled": "ملغي",
   "language": "اللغة",
   "arabic": "العربية",
@@ -66,5 +71,65 @@
   "call": "اتصال",
   "openInMaps": "فتح في الخريطة",
   "followInstagram": "تابعينا على انستقرام",
-  "welcomeDiscount": "استخدمي كود MASAH10 لخصم ١٠٪ على أول طلب"
+  "welcomeDiscount": "استخدمي كود MASAH10 لخصم ١٠٪ على أول طلب",
+  "continueShopping": "مواصلة التسوق",
+  "proceedToCheckout": "متابعة الطلب",
+  "wishlist": "المفضلة",
+  "noFavorites": "لا توجد مفضلات بعد",
+  "notifications": "الإشعارات",
+  "noNotifications": "لا توجد إشعارات بعد",
+  "myOrders": "طلباتي",
+  "shippingInfo": "معلومات الشحن",
+  "returnPolicy": "إرجاع ٣٠ يوم",
+  "securePayment": "دفع آمن",
+  "aboutBrand": "أزياء فاخرة مصنوعة يدوياً من المنطقة الشرقية، المملكة العربية السعودية",
+  "sortBy": "ترتيب",
+  "newest": "الأحدث",
+  "priceLowHigh": "السعر: من الأقل",
+  "priceHighLow": "السعر: من الأعلى",
+  "bestSellers": "الأكثر مبيعاً",
+  "noProducts": "لا توجد منتجات",
+  "clearFilters": "مسح الفلاتر",
+  "itemCount": "{count} منتج",
+  "@itemCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "orderNumber": "طلب #{id}",
+  "@orderNumber": {
+    "placeholders": {
+      "id": {"type": "String"}
+    }
+  },
+  "reviews": "{count} تقييم",
+  "@reviews": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "error": "حدث خطأ ما",
+  "required": "هذا الحقل مطلوب",
+  "invalidEmail": "أدخلي بريد إلكتروني صحيح",
+  "invalidPhone": "أدخلي رقم هاتف صحيح",
+  "selectCountry": "اختاري الدولة",
+  "selectCity": "اختاري المدينة",
+  "selectCountryFirst": "الرجاء اختيار الدولة أولاً",
+  "selectStore": "اختاري الفرع",
+  "searchCountry": "ابحثي عن دولة...",
+  "searchCity": "ابحثي عن مدينة...",
+  "noResults": "لا توجد نتائج",
+  "noStoresAvailable": "لا توجد فروع متاحة",
+  "deliveryMethod": "طريقة التوصيل",
+  "contactInfo": "معلومات التواصل",
+  "shippingAddress": "عنوان الشحن",
+  "fulfillment": "طريقة الاستلام",
+  "pickupInstructions": "تعليمات الاستلام",
+  "pickupIdRequired": "أحضري هوية سارية للتحقق",
+  "pickupOrderNumber": "ستصلك رسالة تأكيد برقم الطلب",
+  "pickupReadyTime": "طلبك سيكون جاهزاً خلال ٢٤ ساعة",
+  "networkError": "خطأ في الشبكة. حاولي مرة أخرى.",
+  "eidCollection": "مجموعة العيد",
+  "newDrop": "مجموعة ٢٠٢٦ الجديدة",
+  "exploreCollection": "اكتشفي أحدث تصاميمنا الحصرية"
 }
