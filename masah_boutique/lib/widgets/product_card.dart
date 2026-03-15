@@ -211,7 +211,7 @@ class _ProductCardState extends State<ProductCard>
                           ),
                         ),
                         child: Text(
-                          l10n.addToCart,
+                          l10n.addToBag,
                           style: const TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
@@ -239,7 +239,7 @@ class _ProductCardState extends State<ProductCard>
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            success ? l10n.addedToCart : l10n.error,
+            success ? l10n.addedToBag : l10n.error,
             style: const TextStyle(color: Colors.white),
           ),
           backgroundColor: success ? kGoldDark : Colors.redAccent,
