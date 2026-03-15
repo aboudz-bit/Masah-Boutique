@@ -1,31 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
-import 'services/api_service.dart';
-import 'services/cart_provider.dart';
-import 'services/locale_provider.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'providers/language_provider.dart';
+import 'providers/cart_provider.dart';
 import 'providers/favorites_provider.dart';
+import 'services/api_service.dart';
 import 'screens/home_screen.dart';
-import 'screens/products_screen.dart';
-import 'screens/product_detail_screen.dart';
+import 'screens/shop_screen.dart';
 import 'screens/cart_screen.dart';
+import 'screens/settings_screen.dart';
+import 'screens/product_detail_screen.dart';
 import 'screens/checkout_screen.dart';
 import 'screens/orders_screen.dart';
-import 'screens/stores_screen.dart';
-import 'screens/settings_screen.dart';
-import 'screens/category_screen.dart';
 import 'screens/order_confirmation_screen.dart';
+import 'screens/category_screen.dart';
+import 'screens/notifications_screen.dart';
 import 'utils/arabic_digits.dart';
 
-const kGoldPrimary = Color(0xFFC8A96E);
-const kGoldDark = Color(0xFFB8944E);
-const kBgDark = Color(0xFF1A1A2E);
-const kBgDarker = Color(0xFF16162A);
-const kBgCard = Color(0xFF222240);
+const kGoldPrimary = Color(0xFFB89B5E);
+const kGoldDark = Color(0xFF9C7F42);
+const kCreamBg = Color(0xFFF4F4F4);
+const kCardBg = Color(0xFFFFFFFF);
+const kCharcoal = Color(0xFF1C1C1C);
+const kSecondaryText = Color(0xFF6B6B6B);
+const kDivider = Color(0xFFEAEAEA);
+
+const _playfairFamily = 'PlayfairDisplay';
+
+TextStyle playfairDisplay({double fontSize = 16, FontWeight fontWeight = FontWeight.w400, Color? color}) {
+  return TextStyle(fontFamily: _playfairFamily, fontSize: fontSize, fontWeight: fontWeight, color: color);
+}
+
+final apiService = ApiService();
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const MasahBoutiqueApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => LanguageProvider()),
+        ChangeNotifierProvider(create: (_) => CartProvider(apiService)),
+        ChangeNotifierProvider(create: (_) => FavoritesProvider(apiService)),
+      ],
+      child: const MasahBoutiqueApp(),
+    ),
+  );
 }
 
 class MasahBoutiqueApp extends StatelessWidget {
@@ -33,125 +53,140 @@ class MasahBoutiqueApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => CartProvider()),
-        ChangeNotifierProvider(create: (_) => LocaleProvider()),
-        ChangeNotifierProvider(create: (_) => FavoritesProvider()),
+    final langProvider = Provider.of<LanguageProvider>(context);
+
+    return MaterialApp(
+      title: 'بوتيك ماسـة',
+      debugShowCheckedModeBanner: false,
+      locale: langProvider.locale,
+      supportedLocales: const [Locale('ar'), Locale('en')],
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
       ],
-      child: Consumer<LocaleProvider>(
-        builder: (context, localeProvider, _) {
-          return MaterialApp(
-            title: 'بوتيك ماسـة',
-            debugShowCheckedModeBanner: false,
-            locale: localeProvider.locale,
-            supportedLocales: const [
-              Locale('ar'),
-              Locale('en'),
-            ],
-            localizationsDelegates: const [
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            theme: ThemeData(
-              colorScheme: ColorScheme.dark(
-                primary: kGoldPrimary,
-                secondary: const Color(0xFFE8D5A8),
-                surface: kBgDark,
-                onPrimary: kBgDark,
-                onSecondary: kBgDark,
-                onSurface: Colors.white,
-              ),
-              scaffoldBackgroundColor: kBgDark,
-              appBarTheme: const AppBarTheme(
-                backgroundColor: kBgDarker,
-                foregroundColor: kGoldPrimary,
-                elevation: 0,
-                centerTitle: true,
-              ),
-              elevatedButtonTheme: ElevatedButtonThemeData(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: kGoldPrimary,
-                  foregroundColor: kBgDark,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
-                  elevation: 0,
-                ),
-              ),
-              cardTheme: CardTheme(
-                elevation: 0,
-                color: kBgCard,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-              ),
-              bottomNavigationBarTheme: BottomNavigationBarThemeData(
-                backgroundColor: kBgDarker,
-                selectedItemColor: kGoldPrimary,
-                unselectedItemColor: Colors.grey[600],
-                type: BottomNavigationBarType.fixed,
-                elevation: 0,
-              ),
-              useMaterial3: true,
-            ),
-            home: const MainScreen(),
-            onGenerateRoute: (settings) {
-              Widget? page;
-              if (settings.name?.startsWith('/product/') ?? false) {
-                final idStr = settings.name!.replaceFirst('/product/', '');
-                final id = int.tryParse(idStr);
-                if (id != null) page = ProductDetailScreen(productId: id);
-              } else if (settings.name?.startsWith('/category/') ?? false) {
-                final slug = settings.name!.replaceFirst('/category/', '');
-                if (slug.isNotEmpty) page = CategoryScreen(slug: slug);
-              } else if (settings.name == '/checkout') {
-                page = const CheckoutScreen();
-              } else if (settings.name == '/orders') {
-                page = const OrdersScreen();
-              } else if (settings.name == '/stores') {
-                page = const StoresScreen();
-              } else if (settings.name == '/order-confirmation') {
-                page = OrderConfirmationScreen(order: settings.arguments);
-              }
-              if (page != null) {
-                return PageRouteBuilder(
-                  pageBuilder: (context, animation, secondaryAnimation) => page!,
-                  transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                    return FadeTransition(
-                      opacity: animation,
-                      child: SlideTransition(
-                        position: Tween<Offset>(begin: const Offset(0, 0.03), end: Offset.zero).animate(
-                          CurvedAnimation(parent: animation, curve: Curves.easeOut),
-                        ),
-                        child: child,
-                      ),
-                    );
-                  },
-                  transitionDuration: const Duration(milliseconds: 280),
-                );
-              }
-              return null;
-            },
-          );
-        },
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: kGoldPrimary,
+          brightness: Brightness.light,
+          primary: kGoldPrimary,
+          secondary: kGoldDark,
+          surface: kCardBg,
+          onSurface: kCharcoal,
+        ),
+        scaffoldBackgroundColor: kCreamBg,
+        appBarTheme: AppBarTheme(
+          backgroundColor: kCreamBg,
+          foregroundColor: kCharcoal,
+          elevation: 0,
+          centerTitle: true,
+          titleTextStyle: playfairDisplay(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: kCharcoal,
+          ),
+        ),
+        textTheme: TextTheme(
+          displayLarge: playfairDisplay(fontSize: 32, fontWeight: FontWeight.w700, color: kCharcoal),
+          displayMedium: playfairDisplay(fontSize: 28, fontWeight: FontWeight.w700, color: kCharcoal),
+          displaySmall: playfairDisplay(fontSize: 24, fontWeight: FontWeight.w600, color: kCharcoal),
+          headlineMedium: playfairDisplay(fontSize: 20, fontWeight: FontWeight.w600, color: kCharcoal),
+          titleLarge: playfairDisplay(fontSize: 18, fontWeight: FontWeight.w600, color: kCharcoal),
+          titleMedium: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500, color: kCharcoal),
+          bodyLarge: const TextStyle(fontSize: 16, color: kSecondaryText),
+          bodyMedium: const TextStyle(fontSize: 14, color: kSecondaryText),
+          bodySmall: const TextStyle(fontSize: 12, color: kSecondaryText),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: kGoldPrimary,
+            foregroundColor: Colors.white,
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, letterSpacing: 1.0),
+            elevation: 0,
+          ),
+        ),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: kCharcoal,
+            side: const BorderSide(color: kDivider, width: 1),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        ),
+        cardTheme: CardTheme(
+          elevation: 1,
+          shadowColor: Colors.black.withOpacity(0.06),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          color: kCardBg,
+        ),
+        dividerColor: kDivider,
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          backgroundColor: kCardBg,
+          selectedItemColor: kGoldPrimary,
+          unselectedItemColor: kSecondaryText,
+          type: BottomNavigationBarType.fixed,
+          elevation: 0,
+        ),
+        useMaterial3: true,
       ),
+      home: const MainNavigation(),
+      onGenerateRoute: (settings) {
+        Widget? page;
+        if (settings.name?.startsWith('/product/') ?? false) {
+          final idStr = settings.name!.replaceFirst('/product/', '');
+          final id = int.tryParse(idStr);
+          if (id != null) page = ProductDetailScreen(productId: id);
+        } else if (settings.name?.startsWith('/category/') ?? false) {
+          final slug = settings.name!.replaceFirst('/category/', '');
+          if (slug.isNotEmpty) page = CategoryScreen(slug: slug);
+        } else if (settings.name == '/notifications') {
+          page = const NotificationsScreen();
+        } else if (settings.name == '/checkout') {
+          page = const CheckoutScreen();
+        } else if (settings.name == '/orders') {
+          page = const OrdersScreen();
+        } else if (settings.name == '/order-confirmation') {
+          page = OrderConfirmationScreen(order: settings.arguments);
+        }
+        if (page != null) {
+          return PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) => page!,
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(begin: const Offset(0, 0.03), end: Offset.zero).animate(
+                    CurvedAnimation(parent: animation, curve: Curves.easeOut),
+                  ),
+                  child: child,
+                ),
+              );
+            },
+            transitionDuration: const Duration(milliseconds: 280),
+          );
+        }
+        return null;
+      },
     );
   }
 }
 
-class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+class MainNavigation extends StatefulWidget {
+  const MainNavigation({super.key});
 
   @override
-  State<MainScreen> createState() => _MainScreenState();
+  State<MainNavigation> createState() => _MainNavigationState();
 }
 
-class _MainScreenState extends State<MainScreen> {
+class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = const [
+  final _screens = const [
     HomeScreen(),
-    ProductsScreen(),
+    ShopScreen(),
     CartScreen(),
     SettingsScreen(),
   ];
@@ -167,65 +202,40 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isAr = Localizations.localeOf(context).languageCode == 'ar';
-    final lang = Localizations.localeOf(context).languageCode;
-    final cart = context.watch<CartProvider>();
-    final cartBadge = ArabicDigits.convert(cart.itemCount, lang);
+    final l10n = AppLocalizations.of(context)!;
+    final cartProvider = Provider.of<CartProvider>(context);
+    final langProvider = Provider.of<LanguageProvider>(context);
+    final lang = langProvider.languageCode;
+    final cartBadge = ArabicDigits.convert(cartProvider.itemCount, lang);
 
-    return Directionality(
-      textDirection: isAr ? TextDirection.rtl : TextDirection.ltr,
-      child: Scaffold(
-        body: IndexedStack(
-          index: _currentIndex,
-          children: _screens,
-        ),
-        bottomNavigationBar: Container(
-          decoration: BoxDecoration(
-            color: kBgDarker,
-            border: Border(
-              top: BorderSide(
-                color: kGoldPrimary.withOpacity(0.2),
-                width: 1,
-              ),
+    return Scaffold(
+      body: IndexedStack(
+        index: _currentIndex,
+        children: _screens,
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) => setState(() => _currentIndex = index),
+        items: [
+          BottomNavigationBarItem(icon: const Icon(Icons.home_outlined), activeIcon: const Icon(Icons.home), label: l10n.home),
+          BottomNavigationBarItem(icon: const Icon(Icons.shopping_bag_outlined), activeIcon: const Icon(Icons.shopping_bag), label: l10n.shop),
+          BottomNavigationBarItem(
+            icon: Badge(
+              isLabelVisible: cartProvider.itemCount > 0,
+              label: Text(cartBadge, style: const TextStyle(fontSize: 10)),
+              backgroundColor: kGoldPrimary,
+              child: const Icon(Icons.shopping_cart_outlined),
             ),
+            activeIcon: Badge(
+              isLabelVisible: cartProvider.itemCount > 0,
+              label: Text(cartBadge, style: const TextStyle(fontSize: 10)),
+              backgroundColor: kGoldPrimary,
+              child: const Icon(Icons.shopping_cart),
+            ),
+            label: l10n.cart,
           ),
-          child: BottomNavigationBar(
-            currentIndex: _currentIndex,
-            onTap: (index) => setState(() => _currentIndex = index),
-            items: [
-              BottomNavigationBarItem(
-                icon: const Icon(Icons.home_outlined),
-                activeIcon: const Icon(Icons.home),
-                label: isAr ? 'الرئيسية' : 'Home',
-              ),
-              BottomNavigationBarItem(
-                icon: const Icon(Icons.shopping_bag_outlined),
-                activeIcon: const Icon(Icons.shopping_bag),
-                label: isAr ? 'المتجر' : 'Shop',
-              ),
-              BottomNavigationBarItem(
-                icon: Badge(
-                  isLabelVisible: cart.itemCount > 0,
-                  label: Text(cartBadge, style: const TextStyle(fontSize: 10)),
-                  backgroundColor: kGoldPrimary,
-                  child: const Icon(Icons.shopping_cart_outlined),
-                ),
-                activeIcon: Badge(
-                  isLabelVisible: cart.itemCount > 0,
-                  label: Text(cartBadge, style: const TextStyle(fontSize: 10)),
-                  backgroundColor: kGoldPrimary,
-                  child: const Icon(Icons.shopping_cart),
-                ),
-                label: isAr ? 'السلة' : 'Cart',
-              ),
-              BottomNavigationBarItem(
-                icon: const Icon(Icons.settings_outlined),
-                activeIcon: const Icon(Icons.settings),
-                label: isAr ? 'الإعدادات' : 'Settings',
-              ),
-            ],
-          ),
-        ),
+          BottomNavigationBarItem(icon: const Icon(Icons.settings_outlined), activeIcon: const Icon(Icons.settings), label: l10n.settings),
+        ],
       ),
     );
   }

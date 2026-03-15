@@ -47,12 +47,17 @@
   "invalidCode": "Invalid discount code",
   "placeOrder": "Place Order",
   "orderConfirmed": "Order Confirmed!",
+  "orderConfirmedMessage": "Thank you for your order. We will notify you when it ships.",
   "orderHistory": "Order History",
   "noOrders": "No orders yet",
+  "pending": "Pending",
+  "paid": "Paid",
   "processing": "Processing",
   "confirmed": "Confirmed",
   "shipped": "Shipped",
   "delivered": "Delivered",
+  "readyForPickup": "Ready for Pickup",
+  "pickedUp": "Picked Up",
   "cancelled": "Cancelled",
   "language": "Language",
   "arabic": "العربية",
@@ -66,5 +71,65 @@
   "call": "Call",
   "openInMaps": "Open in Maps",
   "followInstagram": "Follow us on Instagram",
-  "welcomeDiscount": "Use code MASAH10 for 10% off your first order"
+  "welcomeDiscount": "Use code MASAH10 for 10% off your first order",
+  "continueShopping": "Continue Shopping",
+  "proceedToCheckout": "Proceed to Checkout",
+  "wishlist": "Wishlist",
+  "noFavorites": "No favorites yet",
+  "notifications": "Notifications",
+  "noNotifications": "No notifications yet",
+  "myOrders": "My Orders",
+  "shippingInfo": "Shipping Info",
+  "returnPolicy": "30-Day Returns",
+  "securePayment": "Secure Payment",
+  "aboutBrand": "Handcrafted luxury fashion from Eastern Province, Saudi Arabia",
+  "sortBy": "Sort",
+  "newest": "Newest",
+  "priceLowHigh": "Price: Low to High",
+  "priceHighLow": "Price: High to Low",
+  "bestSellers": "Best Sellers",
+  "noProducts": "No products found",
+  "clearFilters": "Clear Filters",
+  "itemCount": "{count} items",
+  "@itemCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "orderNumber": "Order #{id}",
+  "@orderNumber": {
+    "placeholders": {
+      "id": {"type": "String"}
+    }
+  },
+  "reviews": "{count} reviews",
+  "@reviews": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "error": "Something went wrong",
+  "required": "This field is required",
+  "invalidEmail": "Enter a valid email",
+  "invalidPhone": "Enter a valid phone number",
+  "selectCountry": "Select Country",
+  "selectCity": "Select City",
+  "selectCountryFirst": "Please select a country first",
+  "selectStore": "Select Store",
+  "searchCountry": "Search country...",
+  "searchCity": "Search city...",
+  "noResults": "No results found",
+  "noStoresAvailable": "No stores available",
+  "deliveryMethod": "Delivery Method",
+  "contactInfo": "Contact Information",
+  "shippingAddress": "Shipping Address",
+  "fulfillment": "Fulfillment",
+  "pickupInstructions": "Pickup Instructions",
+  "pickupIdRequired": "Bring a valid ID for verification",
+  "pickupOrderNumber": "You will receive an order confirmation number",
+  "pickupReadyTime": "Your order will be ready within 24 hours",
+  "networkError": "Network error. Please try again.",
+  "eidCollection": "Eid Collection",
+  "newDrop": "New Collection 2026",
+  "exploreCollection": "Explore our latest exclusive designs"
 }

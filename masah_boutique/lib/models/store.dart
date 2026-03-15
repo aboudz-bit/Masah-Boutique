@@ -41,7 +41,7 @@ class Store {
     );
   }
 
-  String getName(String locale) => locale == 'ar' ? nameAr : nameEn;
-  String getAddress(String locale) => locale == 'ar' ? addressAr : addressEn;
-  String getHours(String locale) => locale == 'ar' ? hoursAr : hoursEn;
+  String name(String locale) => locale == 'ar' ? nameAr : nameEn;
+  String address(String locale) => locale == 'ar' ? addressAr : addressEn;
+  String hours(String locale) => locale == 'ar' ? hoursAr : hoursEn;
 }

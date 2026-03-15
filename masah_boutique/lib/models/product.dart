@@ -52,8 +52,8 @@ class Product {
       nameAr: json['nameAr'] ?? json['name_ar'] ?? '',
       descriptionEn: json['descriptionEn'] ?? json['description_en'] ?? '',
       descriptionAr: json['descriptionAr'] ?? json['description_ar'] ?? '',
-      price: json['price'] ?? 0,
-      originalPrice: json['originalPrice'] ?? json['original_price'],
+      price: (json['price'] as num?)?.toInt() ?? 0,
+      originalPrice: (json['originalPrice'] as num?)?.toInt() ?? (json['original_price'] as num?)?.toInt(),
       category: json['category'] ?? '',
       subcategory: json['subcategory'],
       images: List<String>.from(json['images'] ?? []),
@@ -65,31 +65,13 @@ class Product {
       inStock: json['inStock'] ?? json['in_stock'] ?? true,
       featured: json['featured'] ?? false,
       badge: json['badge'],
-      rating: (json['rating'] ?? 4.5).toDouble(),
-      reviewCount: json['reviewCount'] ?? json['review_count'] ?? 0,
+      rating: (json['rating'] as num?)?.toDouble() ?? 4.5,
+      reviewCount: (json['reviewCount'] as num?)?.toInt() ?? (json['review_count'] as num?)?.toInt() ?? 0,
       arEnabled: json['arEnabled'] ?? json['ar_enabled'] ?? false,
     );
   }
 
-  String getName(String locale) => locale == 'ar' ? nameAr : nameEn;
-  String getDescription(String locale) => locale == 'ar' ? descriptionAr : descriptionEn;
-  String? getFabric(String locale) => locale == 'ar' ? fabricAr : fabricEn;
-
-  String get formattedPrice {
-    final riyals = price ~/ 100;
-    final halalas = price % 100;
-    return halalas > 0 ? '$riyals.$halalas SAR' : '$riyals SAR';
-  }
-
-  String get formattedOriginalPrice {
-    if (originalPrice == null) return '';
-    final riyals = originalPrice! ~/ 100;
-    final halalas = originalPrice! % 100;
-    return halalas > 0 ? '$riyals.$halalas SAR' : '$riyals SAR';
-  }
-
-  int? get discountPercentage {
-    if (originalPrice == null || originalPrice! <= price) return null;
-    return (((originalPrice! - price) / originalPrice!) * 100).round();
-  }
+  String name(String locale) => locale == 'ar' ? nameAr : nameEn;
+  String description(String locale) => locale == 'ar' ? descriptionAr : descriptionEn;
+  String? fabric(String locale) => locale == 'ar' ? fabricAr : fabricEn;
 }

@@ -8,6 +8,10 @@ class Order {
   final int total;
   final String status;
   final String fulfillmentType;
+  final int? pickupStoreId;
+  final String? pickupStoreName;
+  final String? pickupAddress;
+  final String? pickupHours;
   final String customerName;
   final String? customerEmail;
   final String customerPhone;
@@ -28,7 +32,11 @@ class Order {
     required this.discount,
     required this.total,
     required this.status,
-    required this.fulfillmentType,
+    this.fulfillmentType = 'delivery',
+    this.pickupStoreId,
+    this.pickupStoreName,
+    this.pickupAddress,
+    this.pickupHours,
     required this.customerName,
     this.customerEmail,
     required this.customerPhone,
@@ -41,44 +49,65 @@ class Order {
     this.createdAt,
   });
 
+  bool get isPickup => fulfillmentType == 'pickup';
+
   factory Order.fromJson(Map<String, dynamic> json) {
     return Order(
       id: json['id'],
-      sessionId: json['sessionId'] ?? json['session_id'] ?? '',
+      sessionId: json['sessionId'] ?? '',
       items: json['items'],
-      subtotal: json['subtotal'] ?? 0,
-      shipping: json['shipping'] ?? 0,
-      discount: json['discount'] ?? 0,
-      total: json['total'] ?? 0,
+      subtotal: (json['subtotal'] as num).toInt(),
+      shipping: (json['shipping'] as num?)?.toInt() ?? 0,
+      discount: (json['discount'] as num?)?.toInt() ?? 0,
+      total: (json['total'] as num).toInt(),
       status: json['status'] ?? 'processing',
-      fulfillmentType: json['fulfillmentType'] ?? json['fulfillment_type'] ?? 'delivery',
-      customerName: json['customerName'] ?? json['customer_name'] ?? '',
-      customerEmail: json['customerEmail'] ?? json['customer_email'],
-      customerPhone: json['customerPhone'] ?? json['customer_phone'] ?? '',
-      shippingAddress: json['shippingAddress'] ?? json['shipping_address'] ?? '',
-      shippingCity: json['shippingCity'] ?? json['shipping_city'] ?? '',
-      shippingCountry: json['shippingCountry'] ?? json['shipping_country'] ?? '',
-      trackingNumber: json['trackingNumber'] ?? json['tracking_number'],
-      discountCode: json['discountCode'] ?? json['discount_code'],
+      fulfillmentType: json['fulfillmentType'] ?? 'delivery',
+      pickupStoreId: json['pickupStoreId'],
+      pickupStoreName: json['pickupStoreName'],
+      pickupAddress: json['pickupAddress'],
+      pickupHours: json['pickupHours'],
+      customerName: json['customerName'] ?? '',
+      customerEmail: json['customerEmail'],
+      customerPhone: json['customerPhone'] ?? '',
+      shippingAddress: json['shippingAddress'] ?? '',
+      shippingCity: json['shippingCity'] ?? '',
+      shippingCountry: json['shippingCountry'] ?? '',
+      trackingNumber: json['trackingNumber'],
+      discountCode: json['discountCode'],
       notes: json['notes'],
-      createdAt: json['createdAt'] ?? json['created_at'],
+      createdAt: json['createdAt'],
     );
   }
+}
 
-  String get formattedTotal {
-    final riyals = total ~/ 100;
-    final halalas = total % 100;
-    return halalas > 0 ? '$riyals.$halalas SAR' : '$riyals SAR';
-  }
+class AppNotification {
+  final int id;
+  final String userId;
+  final int? orderId;
+  final String title;
+  final String message;
+  final bool read;
+  final String? createdAt;
 
-  String getStatusText(String locale) {
-    final statuses = {
-      'processing': locale == 'ar' ? 'قيد المعالجة' : 'Processing',
-      'confirmed': locale == 'ar' ? 'تم التأكيد' : 'Confirmed',
-      'shipped': locale == 'ar' ? 'تم الشحن' : 'Shipped',
-      'delivered': locale == 'ar' ? 'تم التوصيل' : 'Delivered',
-      'cancelled': locale == 'ar' ? 'ملغي' : 'Cancelled',
-    };
-    return statuses[status] ?? status;
+  AppNotification({
+    required this.id,
+    required this.userId,
+    this.orderId,
+    required this.title,
+    required this.message,
+    required this.read,
+    this.createdAt,
+  });
+
+  factory AppNotification.fromJson(Map<String, dynamic> json) {
+    return AppNotification(
+      id: json['id'],
+      userId: json['userId'] ?? '',
+      orderId: json['orderId'],
+      title: json['title'] ?? '',
+      message: json['message'] ?? '',
+      read: json['read'] ?? false,
+      createdAt: json['createdAt'],
+    );
   }
 }
